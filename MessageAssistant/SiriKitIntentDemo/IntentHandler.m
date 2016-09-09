@@ -19,7 +19,7 @@
 // "Cancel my workout using <myApp>"
 // "End my workout using <myApp>"
 
-@interface IntentHandler () <INStartWorkoutIntentHandling, INPauseWorkoutIntentHandling, INResumeWorkoutIntentHandling, INCancelWorkoutIntentHandling, INEndWorkoutIntentHandling, INSendMessageIntentHandling>
+@interface IntentHandler () <INStartWorkoutIntentHandling, INPauseWorkoutIntentHandling, INResumeWorkoutIntentHandling, INCancelWorkoutIntentHandling, INEndWorkoutIntentHandling, INSendMessageIntentHandling, INStartAudioCallIntentHandling, INStartVideoCallIntentHandling, INSearchCallHistoryIntentHandling, INCallsDomainHandling>
 
 @end
 
@@ -31,13 +31,18 @@
     
     id handler = nil;
     
+    NSLog(@"Intent identifier:%@", intent.description);
+    
     // You can substitute other objects for self based on the specific intent.
     if ([intent isKindOfClass:[INStartWorkoutIntent class]] ||
         [intent isKindOfClass:[INPauseWorkoutIntent class]] ||
         [intent isKindOfClass:[INResumeWorkoutIntent class]] ||
         [intent isKindOfClass:[INCancelWorkoutIntent class]] ||
         [intent isKindOfClass:[INEndWorkoutIntent class]] ||
-        [intent isKindOfClass:[INSendMessageIntent class]]
+        /*[intent isKindOfClass:[INSendMessageIntent class]] ||*/
+        [intent isKindOfClass:[INStartVideoCallIntent class]]||
+        [intent isKindOfClass:[INStartAudioCallIntent class]] ||
+        [intent isKindOfClass:[INSearchCallHistoryIntent class]]
         ) {
         handler = self;
     }
@@ -121,7 +126,6 @@
 
 - (void)handleCancelWorkout:(INCancelWorkoutIntent *)cancelWorkoutIntent completion:(void (^)(INCancelWorkoutIntentResponse * _Nonnull))completion {
     // Implement your application logic to cancel a workout here.
-    
     NSUserActivity *userActivity = [[NSUserActivity alloc] initWithActivityType:NSStringFromClass([INCancelWorkoutIntent class])];
     INCancelWorkoutIntentResponse *response = [[INCancelWorkoutIntentResponse alloc] initWithCode:INCancelWorkoutIntentResponseCodeContinueInApp userActivity:userActivity];
     completion(response);
@@ -153,7 +157,7 @@
 
 - (void)resolveRecipientsForSendMessage:(INSendMessageIntent *)intent withCompletion:(void (^)(NSArray<INPersonResolutionResult *> * _Nonnull))completion {
     NSLog(@"%@", NSStringFromSelector(_cmd));
-    NSLog(@"count = %u", intent.recipients.count);
+    NSLog(@"count = %lu", intent.recipients.count);
 //    completion(@[[INStringResolutionResult needsValue]]);
     if (intent.recipients.count <= 0) {
         completion(@[[INStringResolutionResult needsValue]]);
@@ -189,6 +193,110 @@
 }
 
 
+#pragma mark - INStartVideoCallIntentHandling
+- (void)resolveContactsForStartVideoCall:(INStartVideoCallIntent *)intent withCompletion:(void (^)(NSArray<INPersonResolutionResult *> * _Nonnull))completion {
+    if (intent.contacts.count <= 0) {
+        completion(@[[INPersonResolutionResult needsValue]]);
+        return;
+    }
+    
+    NSMutableArray<INPersonResolutionResult *> *results = [NSMutableArray new];
+    for (INPerson *person in intent.contacts) {
+        [results addObject:[INPersonResolutionResult successWithResolvedPerson:person]];
+    }
+    
+    completion(results);
+}
+
+- (void)confirmStartVideoCall:(INStartVideoCallIntent *)intent completion:(void (^)(INStartVideoCallIntentResponse * _Nonnull))completion {
+    INStartVideoCallIntentResponse *response = nil;
+    NSUserActivity *activity = nil;
+    if (intent.contacts.count > 0) {
+        response = [[INStartVideoCallIntentResponse alloc] initWithCode:(INStartVideoCallIntentResponseCodeReady) userActivity:activity];
+    } else {
+        response = [[INStartVideoCallIntentResponse alloc] initWithCode:(INStartVideoCallIntentResponseCodeFailure) userActivity:activity];
+    }
+    
+    completion(response);
+}
+
+- (void)handleStartVideoCall:(INStartVideoCallIntent *)intent completion:(void (^)(INStartVideoCallIntentResponse * _Nonnull))completion {
+    INStartVideoCallIntentResponse *response = [[INStartVideoCallIntentResponse alloc] initWithCode:(INStartVideoCallIntentResponseCodeReady) userActivity:nil];
+    completion(response);
+    // 业务逻辑实现
+}
+
+#pragma mark - INStartAudioCallIntentHandling
+- (void)resolveContactsForStartAudioCall:(INStartAudioCallIntent *)intent withCompletion:(void (^)(NSArray<INPersonResolutionResult *> * _Nonnull))completion {
+    if (intent.contacts.count <= 0) {
+        completion(@[[INPersonResolutionResult needsValue]]);
+        return;
+    }
+    
+    NSMutableArray<INPersonResolutionResult *> *results = [NSMutableArray new];
+    for (INPerson *person in intent.contacts) {
+        [results addObject:[INPersonResolutionResult successWithResolvedPerson:person]];
+    }
+    
+    completion(results);
+}
+
+- (void)confirmStartAudioCall:(INStartAudioCallIntent *)intent completion:(void (^)(INStartAudioCallIntentResponse * _Nonnull))completion {
+    INStartAudioCallIntentResponse *response = nil;
+    NSUserActivity *activity = nil;
+    if (intent.contacts.count > 0) {
+        response = [[INStartAudioCallIntentResponse alloc] initWithCode:(INStartAudioCallIntentResponseCodeReady) userActivity:activity];
+    } else {
+        response = [[INStartAudioCallIntentResponse alloc] initWithCode:(INStartAudioCallIntentResponseCodeFailure) userActivity:activity];
+    }
+    
+    completion(response);
+}
+
+- (void)handleStartAudioCall:(INStartAudioCallIntent *)intent completion:(void (^)(INStartAudioCallIntentResponse * _Nonnull))completion {
+    INStartAudioCallIntentResponse *response = [[INStartAudioCallIntentResponse alloc] initWithCode:(INStartAudioCallIntentResponseCodeReady) userActivity:nil];
+    completion(response);
+    // 业务逻辑实现
+}
+
+#pragma mark - INSearchCallHistoryIntentHandling
+- (void)resolveRecipientForSearchCallHistory:(INSearchCallHistoryIntent *)intent withCompletion:(void (^)(INPersonResolutionResult * _Nonnull))completion {
+    NSLog(@"%@", NSStringFromSelector(_cmd));
+    
+    if (!intent.recipient) {
+        completion([INPersonResolutionResult needsValue]);
+        return;
+    }
+    
+    completion([INPersonResolutionResult successWithResolvedPerson:intent.recipient]);
+    
+}
+
+- (void)resolveCallTypeForSearchCallHistory:(INSearchCallHistoryIntent *)intent withCompletion:(void (^)(INCallRecordTypeResolutionResult * _Nonnull))completion {
+    if (!intent.recipient) {
+        completion([INCallRecordTypeResolutionResult needsValue]);
+        return;
+    }
+    
+    INCallRecordTypeResolutionResult *result = [INCallRecordTypeResolutionResult successWithResolvedValue:intent.callType];
+    completion(result);
+}
+
+- (void)confirmSearchCallHistory:(INSearchCallHistoryIntent *)intent completion:(void (^)(INSearchCallHistoryIntentResponse * _Nonnull))completion {
+    INSearchCallHistoryIntentResponse *response = nil;
+    if (intent.recipient) {
+        response = [[INSearchCallHistoryIntentResponse alloc] initWithCode:(INSearchCallHistoryIntentResponseCodeReady) userActivity:nil];
+    } else {
+        response = [[INSearchCallHistoryIntentResponse alloc] initWithCode:(INSearchCallHistoryIntentResponseCodeFailure) userActivity:nil];
+    }
+    
+    completion(response);
+}
+
+- (void)handleSearchCallHistory:(INSearchCallHistoryIntent *)intent completion:(void (^)(INSearchCallHistoryIntentResponse * _Nonnull))completion {
+    INSearchCallHistoryIntentResponse *response = [[INSearchCallHistoryIntentResponse alloc] initWithCode:(INSearchCallHistoryIntentResponseCodeReady) userActivity:nil];
+    completion(response);
+}
 
 
 @end

@@ -28,7 +28,15 @@
 			<array/>
 			<key>IntentsSupported</key>
 			<array>
+				<string>INStartVideoCallIntent</string>
+				<string>INStartAudioCallIntent</string>
+				<string>INSearchCallHistoryIntent</string>
 				<string>INSendMessageIntent</string>
+				<string>INStartWorkoutIntent</string>
+				<string>INPauseWorkoutIntent</string>
+				<string>INResumeWorkoutIntent</string>
+				<string>INCancelWorkoutIntent</string>
+				<string>INEndWorkoutIntent</string>
 			</array>
 		</dict>
 		<key>NSExtensionPointIdentifier</key>

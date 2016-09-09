@@ -28,6 +28,8 @@
 			<array>
 				<string>INStartWorkoutIntent</string>
 				<string>INSendMessageIntent</string>
+				<string>INStartVideoCallIntent</string>
+				<string>INStartAudioCallIntent</string>
 			</array>
 		</dict>
 		<key>NSExtensionMainStoryboard</key>

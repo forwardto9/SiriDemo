@@ -66,21 +66,37 @@
 - (void)configureWithInteraction:(INInteraction *)interaction context:(INUIHostedViewContext)context completion:(void (^)(CGSize))completion {
     // Do configuration here, including preparing views and calculating a desired size for presentation.
     
-    INSendMessageIntent *messageIntent = nil;
+    
     
     if (interaction.intent) {
-        messageIntent = (INSendMessageIntent*)interaction.intent;
-        NSMutableString *nameString = [NSMutableString new];
-        for (INPerson *person in messageIntent.recipients) {
-            [nameString appendString:person.displayName];
+        
+        if ([interaction.intent isKindOfClass:[INSendMessageIntent class]]) {
+            INSendMessageIntent *messageIntent = (INSendMessageIntent*)interaction.intent;
+            NSMutableString *nameString = [NSMutableString new];
+            for (INPerson *person in messageIntent.recipients) {
+                [nameString appendString:person.displayName];
+            }
+            
+            self.nameLabel.text = nameString;
+            
+            self.contentTextView.text = messageIntent.content;
+        } else if ([interaction.intent isKindOfClass:[INStartVideoCallIntent class]]) {
+            INStartVideoCallIntent *videoIntent = (INStartVideoCallIntent *)[interaction intent];
+            NSString *name = videoIntent.contacts[0].displayName;
+            self.nameLabel.text = name;
+        } else if ([interaction.intent isKindOfClass:[INStartAudioCallIntent class]]) {
+            INStartAudioCallIntent *videoIntent = (INStartAudioCallIntent *)[interaction intent];
+            NSString *name = videoIntent.contacts[0].displayName;
+            self.nameLabel.text = name;
         }
         
-        self.nameLabel.text = nameString;
         
-        self.contentTextView.text = messageIntent.content;
         
         [self.view setNeedsLayout];
     }
+    
+    
+    
     
     
     
