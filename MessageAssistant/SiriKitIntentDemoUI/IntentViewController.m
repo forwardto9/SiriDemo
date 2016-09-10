@@ -88,6 +88,10 @@
             INStartAudioCallIntent *videoIntent = (INStartAudioCallIntent *)[interaction intent];
             NSString *name = videoIntent.contacts[0].displayName;
             self.nameLabel.text = name;
+        } else if ([interaction.intent isKindOfClass:[INSearchForPhotosIntent class]]) {
+            INSearchForPhotosIntent *intent = (INSearchForPhotosIntent *)[interaction intent];
+            self.nameLabel.text = intent.peopleInPhoto[0].displayName;
+            self.contentTextView.text = intent.albumName;
         }
         
         

@@ -32,6 +32,11 @@
 				<string>INStartAudioCallIntent</string>
 				<string>INSearchCallHistoryIntent</string>
 				<string>INSendMessageIntent</string>
+				<string>INSearchForPhotosIntent</string>
+				<string>INStartPhotoPlaybackIntent</string>
+				<string>INRequestRideIntent</string>
+				<string>INListRideOptionsIntent</string>
+				<string>INGetRideStatusIntent</string>
 				<string>INStartWorkoutIntent</string>
 				<string>INPauseWorkoutIntent</string>
 				<string>INResumeWorkoutIntent</string>

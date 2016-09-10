@@ -19,7 +19,7 @@
 // "Cancel my workout using <myApp>"
 // "End my workout using <myApp>"
 
-@interface IntentHandler () <INStartWorkoutIntentHandling, INPauseWorkoutIntentHandling, INResumeWorkoutIntentHandling, INCancelWorkoutIntentHandling, INEndWorkoutIntentHandling, INSendMessageIntentHandling, INStartAudioCallIntentHandling, INStartVideoCallIntentHandling, INSearchCallHistoryIntentHandling, INCallsDomainHandling>
+@interface IntentHandler () <INStartWorkoutIntentHandling, INPauseWorkoutIntentHandling, INResumeWorkoutIntentHandling, INCancelWorkoutIntentHandling, INEndWorkoutIntentHandling, INSendMessageIntentHandling, INStartAudioCallIntentHandling, INStartVideoCallIntentHandling, INSearchCallHistoryIntentHandling, INCallsDomainHandling, INSearchForPhotosIntentHandling, INStartPhotoPlaybackIntentHandling, INRequestRideIntentHandling, INGetRideStatusIntentHandling, INListRideOptionsIntentHandling>
 
 @end
 
@@ -39,10 +39,15 @@
         [intent isKindOfClass:[INResumeWorkoutIntent class]] ||
         [intent isKindOfClass:[INCancelWorkoutIntent class]] ||
         [intent isKindOfClass:[INEndWorkoutIntent class]] ||
-        /*[intent isKindOfClass:[INSendMessageIntent class]] ||*/
+        [intent isKindOfClass:[INSendMessageIntent class]] ||
         [intent isKindOfClass:[INStartVideoCallIntent class]]||
         [intent isKindOfClass:[INStartAudioCallIntent class]] ||
-        [intent isKindOfClass:[INSearchCallHistoryIntent class]]
+        [intent isKindOfClass:[INSearchCallHistoryIntent class]] ||
+        [intent isKindOfClass:[INSearchForPhotosIntent class]]||
+        [intent isKindOfClass:[INStartPhotoPlaybackIntent class]] ||
+        [intent isKindOfClass:[INRequestRideIntent class]] ||
+        [intent isKindOfClass:[INGetRideStatusIntent class]] ||
+        [intent isKindOfClass:[INListRideOptionsIntent class]]
         ) {
         handler = self;
     }
@@ -297,6 +302,124 @@
     INSearchCallHistoryIntentResponse *response = [[INSearchCallHistoryIntentResponse alloc] initWithCode:(INSearchCallHistoryIntentResponseCodeReady) userActivity:nil];
     completion(response);
 }
+
+#pragma mark - INSearchPhotoIntentHandling
+- (void)resolveAlbumNameForSearchForPhotos:(INSearchForPhotosIntent *)intent withCompletion:(void (^)(INStringResolutionResult * _Nonnull))completion {
+    if (!intent.albumName) {
+        NSLog(@"album not find! %@", NSStringFromSelector(_cmd));
+        completion([INStringResolutionResult needsValue]);
+        return;
+    }
+    
+    
+    completion([INStringResolutionResult successWithResolvedString:intent.albumName]);
+}
+- (void)resolveLocationCreatedForSearchForPhotos:(INSearchForPhotosIntent *)intent withCompletion:(void (^)(INPlacemarkResolutionResult * _Nonnull))completion {
+    if (!intent.locationCreated) {
+        NSLog(@"album not find! %@", NSStringFromSelector(_cmd));
+        completion([INPlacemarkResolutionResult needsValue]);
+        return;
+    }
+    
+    
+    completion([INPlacemarkResolutionResult successWithResolvedPlacemark:intent.locationCreated]);
+}
+- (void)resolvePeopleInPhotoForSearchForPhotos:(INSearchForPhotosIntent *)intent withCompletion:(void (^)(NSArray<INPersonResolutionResult *> * _Nonnull))completion {
+    if (intent.peopleInPhoto.count <= 0) {
+        NSLog(@"album not find! %@", NSStringFromSelector(_cmd));
+        completion(@[[INPersonResolutionResult needsValue]]);
+        return;
+    }
+    
+    
+    
+    
+    completion(@[[INPersonResolutionResult needsValue]]);
+}
+
+- (void)resolveDateCreatedForSearchForPhotos:(INSearchForPhotosIntent *)intent withCompletion:(void (^)(INDateComponentsRangeResolutionResult * _Nonnull))completion {
+    if (!intent.dateCreated) {
+        NSLog(@"album not find! %@", NSStringFromSelector(_cmd));
+        completion([INDateComponentsRangeResolutionResult needsValue]);
+        return;
+    }
+    
+    
+    completion([INDateComponentsRangeResolutionResult successWithResolvedDateComponentsRange:intent.dateCreated]);
+}
+
+- (void)confirmSearchForPhotos:(INSearchForPhotosIntent *)intent completion:(void (^)(INSearchForPhotosIntentResponse * _Nonnull))completion {
+    INSearchForPhotosIntentResponse *response = nil;
+    if (intent.albumName) {
+        response = [[INSearchForPhotosIntentResponse alloc] initWithCode:(INSearchForPhotosIntentResponseCodeReady) userActivity:nil];
+    } else {
+        response = [[INSearchForPhotosIntentResponse alloc] initWithCode:INSearchForPhotosIntentResponseCodeFailure userActivity:nil];
+    }
+    
+    completion(response);
+    
+}
+
+- (void)handleSearchForPhotos:(INSearchForPhotosIntent *)intent completion:(void (^)(INSearchForPhotosIntentResponse * _Nonnull))completion {
+    INSearchForPhotosIntentResponse *response = [[INSearchForPhotosIntentResponse alloc] initWithCode:(INSearchForPhotosIntentResponseCodeReady) userActivity:nil];
+    completion(response);
+}
+
+#pragma mark - RideHandling
+
+- (void)resolvePickupLocationForRequestRide:(INRequestRideIntent *)intent withCompletion:(void (^)(INPlacemarkResolutionResult * _Nonnull))completion {
+    
+}
+
+- (void)resolveDropOffLocationForRequestRide:(INRequestRideIntent *)intent withCompletion:(void (^)(INPlacemarkResolutionResult * _Nonnull))completion {
+    
+}
+
+- (void)confirmRequestRide:(INRequestRideIntent *)intent completion:(void (^)(INRequestRideIntentResponse * _Nonnull))completion {
+    
+}
+
+- (void)handleRequestRide:(INRequestRideIntent *)requestRideIntent
+               completion:(void (^)(INRequestRideIntentResponse *requestRideIntentResponse))completion {
+    INRideStatus* status = [[INRideStatus alloc] init];
+    
+    // Create the request in my app's ride booking software.
+    // Get the resulting request ID to use for configuring the response.
+//    status.rideIdentifier = [self createNewRideRequestWithStartingLocation:requestRideIntent.pickupLocation endingLocation:requestRideIntent.dropOffLocation partySize:requestRideIntent.partySize paymentMethod:requestRideIntent.paymentMethod];
+    
+    // Configure the pickup and dropoff information.
+//    status.estimatedPickupDate = [self estimatedPickupDateForRideRequest:status.rideIdentifier];
+    status.pickupLocation = requestRideIntent.pickupLocation;
+    status.dropOffLocation = requestRideIntent.dropOffLocation;
+    
+    // Retrieve information about the assigned vehicle and driver (if any).
+//    status.vehicle = [self vehicleForRideRequest:status.rideIdentifier];
+//    status.driver = [self driverForRideRequest:status.rideIdentifier];
+    
+    // Configure the vehicle type and pricing.
+//    status.rideOption = [self rideOptionForRideRequest:status.rideIdentifier];
+    
+    // Commit the request and get the current status.
+//    status.phase = [self completeBookingForRideRequest:status.rideIdentifier];
+    
+    // Use the status to determine the success or failure of the request.
+    INRequestRideIntentResponseCode responseCode;
+    if (status.phase == INRidePhaseReceived)
+        responseCode = INRequestRideIntentResponseCodeInProgress;
+    else if (status.phase == INRidePhaseConfirmed)
+        responseCode = INRequestRideIntentResponseCodeSuccess;
+    else
+        responseCode = INRequestRideIntentResponseCodeFailure;
+    
+    // Create the response object and fill it with the status information.
+    INRequestRideIntentResponse* response = [[INRequestRideIntentResponse alloc]
+                                             initWithCode:responseCode userActivity:nil];
+    response.rideStatus = status;
+    
+    // Return the response to SiriKit.
+    completion(response);
+}
+
 
 
 @end

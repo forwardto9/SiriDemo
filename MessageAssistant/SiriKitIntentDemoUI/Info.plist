@@ -30,6 +30,8 @@
 				<string>INSendMessageIntent</string>
 				<string>INStartVideoCallIntent</string>
 				<string>INStartAudioCallIntent</string>
+				<string>INSearchForPhotoIntent</string>
+				<string>INStartPhotoPlaybackIntent</string>
 			</array>
 		</dict>
 		<key>NSExtensionMainStoryboard</key>
